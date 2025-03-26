@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Navbar from './Navbar';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -16,6 +17,7 @@ const Login = () => {
         password,
       });
       localStorage.setItem('access_token', response.data.access);
+      localStorage.setItem('user_id', response.data.user.id);
       localStorage.setItem('refresh_token', response.data.refresh);
       console.log('Token stored:', localStorage.getItem('access_token'));
       navigate('/courses');
@@ -26,6 +28,8 @@ const Login = () => {
   };
 
   return (
+    <>
+    < Navbar />
     <div className="container mt-5">
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
@@ -50,6 +54,7 @@ const Login = () => {
         <button type="submit" className="btn btn-primary">Login</button>
       </form>
     </div>
+    </>
   );
 };
 

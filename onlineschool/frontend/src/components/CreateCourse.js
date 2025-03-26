@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Navbar from './Navbar';
 
 const CreateCourse = () => {
   const [title, setTitle] = useState('');
@@ -44,6 +45,8 @@ const CreateCourse = () => {
   };
 
   return (
+    <>
+    <Navbar></Navbar>
     <div className="container mt-5">
       <h2>Create Course</h2>
       
@@ -74,6 +77,7 @@ const CreateCourse = () => {
         </button>
       </form>
     </div>
+    </>
   );
 };
 

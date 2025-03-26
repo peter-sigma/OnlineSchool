@@ -8,9 +8,17 @@ from .models import Course, Enrollment
 from .serializers import UserSerializer, CourseSerializer, EnrollmentSerializer, MyTokenObtainPairSerializer
 from .permissions import IsInstructorOrAdmin
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.decorators import action
+from django.http import JsonResponse
+
 
 User = get_user_model()
 
+
+# def my_courses(request):
+#     enrolled_courses = Enrollment.objects.filter(student=request.user).select_related('course')
+#     courses = [enrollment.course for enrollment in enrolled_courses]
+#     return JsonResponse({'courses': [course.title for course in courses]})
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
@@ -34,7 +42,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    permission_classes = [permissions.IsAuthenticated, IsInstructorOrAdmin]
+    permission_classes = [permissions.IsAuthenticated]
     
     
     def create(self, request, *args, **kwargs):
@@ -52,3 +60,22 @@ class CourseViewSet(viewsets.ModelViewSet):
 class EnrollmentViewSet(viewsets.ModelViewSet):
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Ensure only students can enroll
+        if request.user.role != 'student':
+            return Response({'error': 'Only students can enroll in courses.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Check if student is already enrolled
+        course_id = request.data.get('course')
+        if Enrollment.objects.filter(student=request.user, course_id=course_id).exists():
+            return Response({'error': 'You are already enrolled in this course.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return super().create(request, *args, **kwargs)
+
+    # Get courses the student is enrolled in
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def my_courses(self, request):
+        enrolled_courses = Enrollment.objects.filter(student=request.user).select_related('course')
+        courses_data = [{'id': enrollment.course.id, 'title': enrollment.course.title} for enrollment in enrolled_courses]
+        return Response(courses_data)

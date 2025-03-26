@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Navbar from './Navbar';
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -27,6 +28,8 @@ const Register = () => {
   };
 
   return (
+    <>
+    <Navbar />
     <div className="container mt-5">
       <h2>Register</h2>
       <form onSubmit={handleSubmit}>
@@ -53,6 +56,7 @@ const Register = () => {
         <button type="submit" className="btn btn-primary">Register</button>
       </form>
     </div>
+    </>
   );
 };
 
